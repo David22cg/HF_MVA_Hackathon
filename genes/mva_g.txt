@@ -1,0 +1,43 @@
+# =====================================================================
+# genes/mva_g.txt  —  Panel de genes para MVA (Track 1)
+# ---------------------------------------------------------------------
+#   Lista de simbolos de genes (nomenclatura HGNC) donde buscamos la
+#   variante causal.
+# COMO SE USA:
+#   Tras anotar con VEP, el script de ranking (03) conserva y prioriza
+#   las variantes cuyo gen (campo SYMBOL) esta en esta lista. Filtrar por
+#   NOMBRE de gen —no por coordenadas— evita errores de build y es robusto.
+#   Los 3 "core" son los causantes confirmados de MVA (un gen por tipo).
+#   Los "ext" son el resto de la maquinaria del checkpoint de ensamblaje
+#   del huso (SAC) y del centrosoma: si la variante esta en un gen "vecino"
+#   funcional, seguira siendo biologicamente plausible (posible fenocopia).
+# FORMATO:
+#   Una linea por gen = SIMBOLO <TAB> tier.  Las lineas con '#' se ignoran.
+# -> estos genes no nos limitaran para hacer findings secundairos?
+# =====================================================================
+
+# --- CORE: causantes confirmados de MVA -----------------------------------
+# BUB1B  = MVA tipo 1 (OMIM 257300). Proteina BubR1 del SAC. El mas frecuente.
+#          Patron tipico: 1 alelo missense + 1 truncante = compound-het.
+#          Ref: Hanks et al. 2004, Nat Genet, doi:10.1038/ng1449
+BUB1B	core
+# CEP57  = MVA tipo 2 (OMIM 614114). Centrosoma, estabiliza microtubulos.
+#          Subtipo: perimetro cefalico normal, brazos cortos, SIN cancer.
+#          Ref: Snape et al. 2011, Nat Genet, doi:10.1038/ng.822
+CEP57	core
+# TRIP13 = MVA tipo 3 (OMIM 617598). ATPasa reguladora del SAC (recicla MAD2).
+#          Subtipo: predisposicion a tumor de Wilms.
+#          Ref: Yost et al. 2017, Nat Genet, doi:10.1038/ng.3883
+TRIP13	core
+
+# --- EXT: resto del SAC / centrosoma (candidatos de fenocopia) ------------
+# MAD2L1BP = p31-comet. Gen MVA mas reciente: aneuploidia + tumores de celulas
+#            de la granulosa. Ref: JCI 2023, PMCID PMC10721328
+MAD2L1BP	ext
+BUB1	ext
+BUB3	ext
+MAD1L1	ext
+MAD2L1	ext
+TTK	ext
+CENPE	ext
+CEP57L1	ext

@@ -1,0 +1,71 @@
+# =====================================================================
+# config.yaml  —  Parametros 
+# ---------------------------------------------------------------------
+# fuentes
+# =====================================================================
+
+proband_id: "WGS_EX2312012_HGWCNDSX7"  
+                        
+paths:
+  vcf_raw:   ""
+  work:      "~/mva/work"
+  out:       "~/mva/out"
+  annotated: "~/mva/work/annotated.tsv"
+  hpo_terms: "./hpo_terms.txt"    
+  panel:     "./genes/mva_g.txt"
+
+# --- 1) RAREZA en poblacion (gnomAD) -------------------------------------
+#     Una variante causal de enfermedad rara tiene que ser rara en sanos.
+freq:
+  # [QUE] AF maxima para variantes RECESIVAS. En recesivas hay portadores
+  #       sanos, asi que se tolera algo de frecuencia.
+  # [FUENTE] (PUBLICADO) marco "filtering allele frequency" de Whiffin et al.
+  #       2017, Genet Med, doi:10.1038/gim.2017.26. MVA tiene prevalencia
+  #       <1/1.000.000, asi que el AF creible real es << 1%: 0.01 es un techo
+  #       generoso y SEGURO (no se arriesga a descartar la causal).
+  max_af_recessive: 0.01
+  # [QUE] AF maxima para DOMINANTES / de novo: practicamente ausente.
+  # [FUENTE] (PUBLICADO) mismo marco Whiffin 2017; coincide con el criterio
+  #       ACMG PM2 (Richards et al. 2015, doi:10.1038/gim.2015.30).
+  max_af_dominant: 0.0001
+
+# --- 2) DANO molecular: ¿la variante estropea la proteina? ---------------
+deleterious:
+  # [QUE] Umbral de AlphaMissense para missense (cambio de aminoacido). 0-1.
+  # [FUENTE] (PUBLICADO) Cheng et al. 2023, Science, doi:10.1126/science.adg7492.
+  #       Clases: <0.34 prob. benigna / 0.34-0.564 ambigua / >0.564 prob.
+  #       patogenica. Usamos 0.564 = su corte de "likely pathogenic".
+  alphamissense_min: 0.564
+  # [QUE] Consecuencias que VEP marca IMPACT=HIGH (rompen la proteina).
+  # [FUENTE] (PUBLICADO) escala de consecuencias de Ensembl VEP, McLaren et al.
+  #       2016, Genome Biol, doi:10.1186/s13059-016-0974-4.
+  high_impact: [frameshift_variant, stop_gained, stop_lost, start_lost,
+                splice_acceptor_variant, splice_donor_variant, transcript_ablation]
+
+# --- 3) RESCATE de mosaicismo --------------------------------------------
+#     MVA mezcla celulas con dotacion cromosomica anormal y normales, asi que
+#     una variante causal puede verse en MENOS del 50% de las lecturas.
+mosaic:
+  # [QUE] Ventana de VAF (fraccion de lecturas con el alelo alterado) para
+  #       sospechar mosaico. Un het germinal limpio cae ~0.5; por debajo, con
+  #       buena profundidad, sugiere mosaico.
+  # [FUENTE] (QC ESTANDAR / ESTRATEGIA) heuristica; el limite exacto varia por
+  #       estudio. 0.35 = claramente por debajo del 0.5 del het; 0.10 = suelo
+  #       de deteccion fiable a profundidad tipica de WGS (~30x). Es el track
+  #       mas heuristico del pipeline (ver GUIA.md).
+  vaf_min: 0.10
+  vaf_max: 0.35
+  # [QUE] Profundidad minima para fiarte de una VAF baja.
+  # [FUENTE] (QC ESTANDAR) GATK Best Practices; DP>=20 es suelo comun para
+  #       llamadas germinales fiables (y mas exigente aun para VAF bajas).
+  min_dp: 20
+
+# --- 4) CALIBRACION de epcr (columna de confianza del CSV) para F-max ----
+#     IMPORTANTE: estas 4 cifras NO vienen de ninguna fuente externa. Son una
+#     (ESTRATEGIA) de como repartir la confianza para que F-max premie una
+#     respuesta "picuda" (no enterrada en ruido). Ajustables.
+epcr:
+  top_clinvar_or_biallelic_lof: 0.95   # candidata #1 solida (ClinVar patog. o LoF bialelico en core)
+  strong_contender: 0.55               # 1-2 alternativas reales
+  weak_contender: 0.20                 # resto plausible
+  secondary_floor: 0.10                # hallazgos secundarios/incidentales
