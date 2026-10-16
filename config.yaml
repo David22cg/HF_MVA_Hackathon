@@ -1,71 +1,73 @@
-# =====================================================================
-# config.yaml  —  Parametros 
-# ---------------------------------------------------------------------
-# fuentes
-# =====================================================================
-
-proband_id: "WGS_EX2312012_HGWCNDSX7"  
+proband_id: ""  
+hf_username: ""  # hugging face
+approach_name: ""   # csv
+add_chr_prefix: true       #  chr
+subtype_hint: "none"       
                         
 paths:
   vcf_raw:   ""
   work:      "~/mva/work"
-  out:       "~/mva/out"
+  out:       ""
   annotated: "~/mva/work/annotated.tsv"
   hpo_terms: "./hpo_terms.txt"    
   panel:     "./genes/mva_g.txt"
+  phenocopy: "./genes/phenocopy.txt" 
+  acmg_sf:   "./genes/acmg_sf.txt"
+  hpo_genes: "~/mva/data/genes_to_phenotype.txt"
+  string_links: "~/mva/data/9606.protein.links.v12.0.txt.gz"
+  string_info:  "~/mva/data/9606.protein.info.v12.0.txt.gz"
+ 
+# intercation network
+network:
+  string_min_score: 700   # 700 high confidence
+  max_neighbors: 10        #max interacting partners drawn per candidate-> tunable
 
-# --- 1) RAREZA en poblacion (gnomAD) -------------------------------------
-#     Una variante causal de enfermedad rara tiene que ser rara en sanos.
+#genomAD
 freq:
-  # [QUE] AF maxima para variantes RECESIVAS. En recesivas hay portadores
-  #       sanos, asi que se tolera algo de frecuencia.
-  # [FUENTE] (PUBLICADO) marco "filtering allele frequency" de Whiffin et al.
-  #       2017, Genet Med, doi:10.1038/gim.2017.26. MVA tiene prevalencia
-  #       <1/1.000.000, asi que el AF creible real es << 1%: 0.01 es un techo
-  #       generoso y SEGURO (no se arriesga a descartar la causal).
+  #max AF for RECESSIVE variants. In recessive disease there are healthy
+  #        carriers, so some frequency is tolerated.
+  # ->  "filtering allele frequency" framework from Whiffin et al.
+  #        2017, Genet Med, doi:10.1038/gim.2017.26. MVA has prevalence
+  #        <1/1,000,000, so the real credible AF is << 1%: 0.01 is a generous
+  #        and safe ceiling.
   max_af_recessive: 0.01
-  # [QUE] AF maxima para DOMINANTES / de novo: practicamente ausente.
-  # [FUENTE] (PUBLICADO) mismo marco Whiffin 2017; coincide con el criterio
-  #       ACMG PM2 (Richards et al. 2015, doi:10.1038/gim.2015.30).
+  # max AF for DOMINANT / de novo: practically absent.
+  # same Whiffin 2017 framework; matches the ACMG PM2 criterion (Richards et al. 2015, doi:10.1038/gim.2015.30).
   max_af_dominant: 0.0001
-
-# --- 2) DANO molecular: ¿la variante estropea la proteina? ---------------
+ 
 deleterious:
-  # [QUE] Umbral de AlphaMissense para missense (cambio de aminoacido). 0-1.
-  # [FUENTE] (PUBLICADO) Cheng et al. 2023, Science, doi:10.1126/science.adg7492.
-  #       Clases: <0.34 prob. benigna / 0.34-0.564 ambigua / >0.564 prob.
-  #       patogenica. Usamos 0.564 = su corte de "likely pathogenic".
+  #AlphaMissense threshold for missense (amino-acid change). 0-1. 
+  #Cheng et al. 2023, Science, doi:10.1126/science.adg7492.
+  #Classes: <0.34 likely benign / 0.34-0.564 ambiguous / >0.564 likely pathogenic. We use 0.564 = their "likely pathogenic" cut-off.
   alphamissense_min: 0.564
-  # [QUE] Consecuencias que VEP marca IMPACT=HIGH (rompen la proteina).
-  # [FUENTE] (PUBLICADO) escala de consecuencias de Ensembl VEP, McLaren et al.
-  #       2016, Genome Biol, doi:10.1186/s13059-016-0974-4.
-  high_impact: [frameshift_variant, stop_gained, stop_lost, start_lost,
-                splice_acceptor_variant, splice_donor_variant, transcript_ablation]
+  #consequences VEP marks as IMPACT=HIGH (break the protein).
+  #Ensembl VEP consequence scale, McLaren et al.
+  #2016, Genome Biol, doi:10.1186/s13059-016-0974-4.
+  high_impact: [frameshift_variant, stop_gained, stop_lost, start_lost, splice_acceptor_variant, splice_donor_variant, transcript_ablation]
+  #SpliceAI threshold (delta score) to call a variant splice-altering.
+  #Jaganathan et al. 2019, Cell, doi:10.1016/j.cell.2018.12.015
+  #(0.5 = recommended cut-off; 0.2 = high sensitivity). 
+  spliceai_min: 0.5
+ 
+phenotype:
+    #phenotype-prioritization concept (Kohler/Exomiser)
+  points_per_match: 0.5
+  max_points: 3
 
-# --- 3) RESCATE de mosaicismo --------------------------------------------
-#     MVA mezcla celulas con dotacion cromosomica anormal y normales, asi que
-#     una variante causal puede verse en MENOS del 50% de las lecturas.
 mosaic:
-  # [QUE] Ventana de VAF (fraccion de lecturas con el alelo alterado) para
-  #       sospechar mosaico. Un het germinal limpio cae ~0.5; por debajo, con
-  #       buena profundidad, sugiere mosaico.
-  # [FUENTE] (QC ESTANDAR / ESTRATEGIA) heuristica; el limite exacto varia por
-  #       estudio. 0.35 = claramente por debajo del 0.5 del het; 0.10 = suelo
-  #       de deteccion fiable a profundidad tipica de WGS (~30x). Es el track
-  #       mas heuristico del pipeline (ver GUIA.md).
+  #The exact limit varies by study.
+  #0.35 = clearly below the het 0.5; 0.10 = reliable detection floor at typical WGS depth (~30x).
   vaf_min: 0.10
   vaf_max: 0.35
-  # [QUE] Profundidad minima para fiarte de una VAF baja.
-  # [FUENTE] (QC ESTANDAR) GATK Best Practices; DP>=20 es suelo comun para
-  #       llamadas germinales fiables (y mas exigente aun para VAF bajas).
-  min_dp: 20
 
-# --- 4) CALIBRACION de epcr (columna de confianza del CSV) para F-max ----
-#     IMPORTANTE: estas 4 cifras NO vienen de ninguna fuente externa. Son una
-#     (ESTRATEGIA) de como repartir la confianza para que F-max premie una
-#     respuesta "picuda" (no enterrada en ruido). Ajustables.
+  #minimum depth to trust a low VAF.
+  #GATK Best Practices; DP>=20 is a common floor for reliable germline calls.
+  min_dp: 20
+ 
+#tunable
 epcr:
-  top_clinvar_or_biallelic_lof: 0.95   # candidata #1 solida (ClinVar patog. o LoF bialelico en core)
-  strong_contender: 0.55               # 1-2 alternativas reales
-  weak_contender: 0.20                 # resto plausible
-  secondary_floor: 0.10                # hallazgos secundarios/incidentales
+  top_clinvar_or_biallelic_lof: 0.95   # solid candidate
+  strong_contender: 0.55               # 1-2 real alternatives
+  weak_contender: 0.20                 # the rest, plausible
+  secondary_floor: 0.10                # secondary/incidental findings
+ 

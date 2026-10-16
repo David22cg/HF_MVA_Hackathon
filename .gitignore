@@ -1,10 +1,6 @@
-# =====================================================================
-# .gitignore  —  Que NO sube a GitHub.
-
-# =====================================================================
-
-# ===== DATOS DEL PACIENTE
 *.vcf
+*.png
+*.csv
 *.vcf.gz
 *.vcf.gz.tbi
 *.fastq
@@ -14,7 +10,7 @@
 *.bai
 *.cram
 hpo_terms.txt          
-# ===== Bases de referencia (grandes, publicas) =====
+
 *.fa
 *.fa.gz
 *.fai
@@ -25,14 +21,12 @@ cache/
 ref/
 data/
 
-# ===== Salidas (regenerables / contienen coords del paciente) =====
+
 work/
 out/                   # incluye el CSV de entrega = variante del paciente
 *.tsv
 chr2nochr.txt
 .stripped_chr
-
-# ===== Entorno =====
 __pycache__/
 *.pyc
 .env

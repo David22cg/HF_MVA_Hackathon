@@ -1,0 +1,42 @@
+
+ESCO2    
+PCNT        
+ATR      
+ATRIP     
+RBBP8      
+DNA2        # enanismo primordial con inestabilidad
+PLK4        # microcefalia + enanismo + retinopatia
+# --- Microcefalia primaria (MCPH) ---
+MCPH1
+WDR62
+CDK5RAP2
+CASC5       # (KNL1)
+KNL1
+ASPM
+CENPJ
+STIL
+CEP135
+CEP152
+CEP63
+SASS6
+KIF14
+# --- Centrosoma / polo del huso (microcefalia + inestabilidad, solape MVA) ---
+PLK1        # regulador maestro de la formacion del huso
+AURKA       # maduracion del centrosoma
+TUBG1       # gamma-tubulina: nuclea los microtubulos
+TUBGCP4     # complejo del anillo de gamma-tubulina (gamma-TuRC)
+TUBGCP6     # complejo del anillo de gamma-tubulina (gamma-TuRC)
+# --- Cohesinopatias (Cornelia de Lange) ---
+NIPBL
+SMC1A
+SMC3
+STAG2       # regulador de la cohesina
+RAD21
+HDAC8
+# --- Condensinopatias (empaquetado cromosomico; microcefalia) ---
+NCAPD2      # condensina I
+NCAPD3      # condensina II
+NCAPH       # condensina I
+# --- Reparacion / instabilidad adicional ---
+LIG4
+NSMCE2
