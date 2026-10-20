@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# INPUT : work/candidates.tsv  
-# OUTPUT: out/<hf_username>_<approach_name>.csv  
-#   1. Takes the best candidates
-#   2. Assigns epcr .
-#   4. Marks finding_type: primary (panel gene) / secondary (incidental).
-#
-# USAGE:  python3 05_make_csv.py            # uses ./config.yaml
 import sys, os, csv, yaml
 
 cfg = yaml.safe_load(open(sys.argv[1] if len(sys.argv) > 1 else "config.yaml"))
@@ -13,7 +5,7 @@ WORK = os.path.expanduser(cfg["paths"]["work"])
 OUT  = os.path.expanduser(cfg["paths"]["out"]); os.makedirs(OUT, exist_ok=True)
 CAND = os.path.join(WORK, "candidates.tsv")
 
-# Optional keys with defaults (so it does not fail if they are missing in config.yaml).
+# Optional keys with defaults 
 PID      = cfg.get("proband_id", "PROBAND")
 HF       = cfg.get("hf_username", "user")
 APPROACH = cfg.get("approach_name", "offline-3track")
@@ -49,10 +41,7 @@ def is_path(r):
     s = (r["clnsig_1"] or "").lower()
     return "pathogenic" in s and "conflicting" not in s
 
-#   1) tier (core > ext > phenocopy > HPO > rescue)  
-#   2) 2nd copy (LOH) = biallelic  -> only rises within the same tier
-#   3) ClinVar pathogenic
-#   4) score
+
 def prim_key(r):
     return (TIER_RANK.get(r["tier"], 0), r["symbol"] in loh_genes, is_path(r), float(r["score"]))
 primaries   = sorted([r for r in rows if r["tier"] in PRIMARY_TIERS], key=prim_key, reverse=True)
@@ -82,7 +71,7 @@ for i, r in enumerate(selected):
         epcr = min(epcr, 0.15)
     if finding == "secondary":
         epcr = min(epcr, E["secondary_floor"])       # <=0.1
-    # the ranking already goes from more to less confidence -> epcr never rises going down
+    
     epcr = min(epcr, prev_epcr)
     prev_epcr = epcr
 

@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
-# 01_prep.sh  —  Get the RAW VCF ready to annotate 
-#   (1) subset of sample + main chromosomes (1-22, X, Y).
-#       Scaffolds/alt contigs and the mitochondrion do not contain MVA panel genes.
+# 01_prep.sh  
+#   (1) subset of sample + main chromosomes (1-22, X, Y). Scaffolds/alt contigs and the mitochondrion do not contain MVA panel genes.
 #   (2) reconciles the naming
 #   (3) normalizes with 'bcftools norm':
 #         -m-any   splits multiallelics (ALT "A,T") into one row per allele
-#                  -> each allele can be matched separately (essential to phase
-#                  a compound-het).
-#         -f FASTA left-aligns indels -> the SAME variant is always written the
-#                  same way as in ClinVar -> matching works.
+#                  -> each allele can be matched separately 
+#         -f FASTA left-aligns indels -> the SAME variant is always written the same way as in ClinVar -> matching works.
 # =====================================================================
 set -euo pipefail
 
@@ -28,12 +25,11 @@ if [[ ! -f "${VCF_IN}.tbi" && ! -f "${VCF_IN}.csi" ]]; then
   bcftools index -t -f "$VCF_IN"
 fi
 
-# sample
+set +o pipefail
 SAMPLE=$(bcftools query -l "$VCF_IN" | head -n1)
-echo "[prep] sample = $SAMPLE"
-
-#renaming if necessary 
 FIRST_CHR=$(bcftools view -H "$VCF_IN" 2>/dev/null | head -n1 | cut -f1)
+set -o pipefail
+echo "[prep] sample = $SAMPLE"
 echo "[prep] first chromosome = $FIRST_CHR"
 
 if [[ "$FIRST_CHR" == chr* ]]; then

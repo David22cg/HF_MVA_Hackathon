@@ -4,9 +4,6 @@
 #     - gnomAD (AF)                    -> rarity: a rare-disease cause is rare
 #     - ClinVar (CLNSIG)               -> already-curated clinical classification
 #     - AlphaMissense (am_patho...)    -> missense pathogenicity (VUS)
-#   all with local databases
-#
-#   Requires: VEP GRCh38 cache + FASTA + ClinVar + AlphaMissense
 set -euo pipefail
 
 #paths
@@ -28,7 +25,7 @@ VEP_ARGS=(
   --vcf --compress_output bgzip                           # annotated+bgzip VCF out (keeps GT/AD/DP)
   --output_file "$OUT" --force_overwrite --stats_text
   --fork "$THREADS" --buffer_size 20000                   # speed on >500k variants
-  --symbol --canonical                                    # gene SYMBOL + canonical transcript
+  --symbol --canonical                                    # gene symbol + canonical transcript
   --af_gnomadg --af_gnomade                               # gnomAD frequencies (genome and exome)
   --sift b --polyphen b                                   # classic predictors (support)
   --pick_allele_gene                                      # 1 consequence per allele and gene (manageable CSQ)
@@ -37,29 +34,38 @@ VEP_ARGS=(
   --plugin AlphaMissense,file="$DATA/AlphaMissense_hg38.ens.tsv.gz"
 )
 
-# SpliceAI: predicts creation/loss of splice sites (the typical mechanism of the BUB1B 2nd allele). 
-#It needs 2 precomputed VCFs (~30 GB total) downloaded from Illumina/BaseSpace with registration.
-USE_SPLICEAI=1
-SPLICEAI_SNV="$DATA/spliceai_scores.raw.snv.hg38.vcf.gz"
-SPLICEAI_INDEL="$DATA/spliceai_scores.raw.indel.hg38.vcf.gz"
-#
-# LOFTEE: confirms a LoF is really loss-of-function. Lighter than SpliceAI but needs the LOFTEE repo + human_ancestor.fa.gz (~1 GB).
-USE_LOFTEE=1
-LOFTEE_PATH="$HOME/.vep/Plugins/loftee"
-HUMAN_ANCESTOR="$DATA/human_ancestor.fa.gz"
 
+
+#predicts creation/loss of splice sites
+USE_SPLICEAI=1
+SPLICEAI_SNV="$DATA/spliceai.hg38.vcf.gz"
+SPLICEAI_INDEL="$DATA/spliceai.hg38.vcf.gz"
+#
+# LOFTEE: confirms a LoF is really loss-of-function 
+ USE_LOFTEE=1
+ LOFTEE_PATH="$HOME/.vep/Plugins/loftee"
+ HUMAN_ANCESTOR="$DATA/human_ancestor.fa.gz"
+ GERP_BW="$DATA/gerp_conservation_scores.homo_sapiens.GRCh38.bw"
+ LOFTEE_SQL="$DATA/loftee.sql"
+ 
 if [[ "${USE_SPLICEAI:-0}" == "1" ]]; then
-  [[ -f "$SPLICEAI_SNV" && -f "$SPLICEAI_INDEL" ]] || { echo "ERROR: SpliceAI VCFs missing"; exit 1; }
+  [[ -f "$SPLICEAI_SNV" && -f "$SPLICEAI_INDEL" ]] || { echo "error: SpliceAI VCFs missing"; exit 1; }
   VEP_ARGS+=(--plugin "SpliceAI,snv=$SPLICEAI_SNV,indel=$SPLICEAI_INDEL")
-  echo "[vep] SpliceAI ENABLED (03's rescue track will use spliceai_min)"
+  echo "[vep] SpliceAI enabled "
 fi
 if [[ "${USE_LOFTEE:-0}" == "1" ]]; then
-  VEP_ARGS+=(--plugin "LoF,loftee_path:$LOFTEE_PATH,human_ancestor_fa:$HUMAN_ANCESTOR")
-  echo "[vep] LOFTEE ENABLED"
+  
+  for f in "$HUMAN_ANCESTOR" "$GERP_BW" "$LOFTEE_SQL"; do
+    [[ -f "$f" ]] || { echo "error: LOFTEE file missing: $f"; exit 1; }
+  done
+  command -v samtools >/dev/null || { echo "error: samtools not on PATH (conda install -n vep -c bioconda samtools)"; exit 1; }
+  export PERL5LIB="${PERL5LIB:-}:$LOFTEE_PATH"      # so VEP finds loftee's modules
+  VEP_ARGS+=(--plugin "LoF,loftee_path:$LOFTEE_PATH,human_ancestor_fa:$HUMAN_ANCESTOR,gerp_bigwig:$GERP_BW,conservation_file:$LOFTEE_SQL")
+  echo "[vep] LOFTEE enabled "
 fi
-
-
+ 
 vep "${VEP_ARGS[@]}"
 tabix -p vcf "$OUT"
 echo "[vep] done -> $OUT"
-
+ 
+ 

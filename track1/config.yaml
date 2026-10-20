@@ -1,6 +1,6 @@
-proband_id: ""  
-hf_username: ""  # hugging face
-approach_name: ""   # csv
+proband_id: "WGS_EX2312012_HGWCNDSX7"  
+hf_username: "genomEx"  # hugging face
+approach_name: "MVA_track1"   # csv
 add_chr_prefix: true       #  chr
 subtype_hint: "none"       
                         
@@ -20,7 +20,7 @@ paths:
 # intercation network
 network:
   string_min_score: 700   # 700 high confidence
-  max_neighbors: 10        #max interacting partners drawn per candidate-> tunable
+  max_neighbors: 5       #max interacting partners drawn per candidate-> tunable
 
 #genomAD
 freq:
@@ -31,7 +31,7 @@ freq:
   #        <1/1,000,000, so the real credible AF is << 1%: 0.01 is a generous
   #        and safe ceiling.
   max_af_recessive: 0.01
-  # max AF for DOMINANT / de novo: practically absent.
+  # max AF for dominant / de novo: practically absent.
   # same Whiffin 2017 framework; matches the ACMG PM2 criterion (Richards et al. 2015, doi:10.1038/gim.2015.30).
   max_af_dominant: 0.0001
  

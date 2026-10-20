@@ -12,7 +12,6 @@ KNOWN_CALLERS = ("gatk", "haplotypecaller", "dragen", "deepvariant", "strelka", 
 
 #header
 def parse_header(fh):
-    """Read only the header and return what drives the pipeline."""
     h = dict(samples=[], callers=set(), info_ids=set(), chr1_len=None)
     for line in fh:
         if not line.startswith("#"):

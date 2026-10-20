@@ -1,12 +1,8 @@
-#!/usr/bin/env python3
+#   (A) mosaic aneuploidy score:
+#       Estimates the mosaicism fraction per chromosome from the B-allele frequency  deviation of heterozygous SNPs
 #
-#   (A) MOSAIC ANEUPLOIDY SCORE 
-#       Estimates the mosaicism FRACTION per chromosome from the B-allele frequency  deviation of heterozygous SNPs
-#
-#   (B) CRYPTIC 2nd-COPY DETECTOR via LOH / allelic imbalance
+#   (B) cryptic 2nd copy detector:
 #       In the candidate genes, it looks for loss of heterozygosity, a depth drop or allelic imbalance
-#
-# USAGE:  python3 04_baf_map.py            # uses ./config.yaml
 import sys, os, csv, subprocess, yaml
 import numpy as np
 import matplotlib; matplotlib.use("Agg")

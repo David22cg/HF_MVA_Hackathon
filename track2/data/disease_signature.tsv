@@ -1,0 +1,46 @@
+# literature-derived consensus signature of the cellular state caused
+# by constitutional aneuploidy / chromosomal instability. 
+#
+# direction: +1 = UP in aneuploid/stressed cells, -1 = DOWN.
+# Sources: Durrbaum/Sheltzer (aneuploidy response gene expression);
+#          Santaguida & Amon 2015; Donnelly 2014 (HSF1/HSP90 heat-shock);
+#          Coppe 2010 (SASP); p53/senescence & integrated-stress-response panels.
+
+# UP: proteostasis / heat-shock response (misfolded-protein load)
+HSPA1A	1
+HSPA1B	1
+DNAJB1	1
+BAG3	1
+HSPH1	1
+SERPINH1	1
+HSP90AA1	1
+# UP: autophagy (clearance of excess protein)
+SQSTM1	1
+MAP1LC3B	1
+# UP: p53 / senescence / growth arrest
+CDKN1A	1
+CDKN2A	1
+GADD45A	1
+MDM2	1
+#UP: integrated stress / ER stress response
+DDIT3	1
+ATF4	1
+TRIB3	1
+#UP: oxidative-stress (NRF2)
+HMOX1	1
+NQO1	1
+#UP: inflammatory SASP 
+IL6	1
+CXCL8	1
+NFKB1	1
+#DOWN: proliferation / cell-cycle drive / ribosome biogenesis
+MKI67	-1
+CCNB1	-1
+CCNE2	-1
+E2F1	-1
+MYC	-1
+RRM2	-1
+MCM2	-1
+MCM6	-1
+TOP2A	-1
+FOXM1	-1

@@ -1,0 +1,13 @@
+# Compounds independently reported to selectively stress / kill aneuploid
+# cells.  
+# Source: Tang, Williams, Siegel & Amon 2011, Cell 144:499 (energy & proteotoxic
+#   stress compounds: AICAR/AMPK, 17-AAG/HSP90, chloroquine/autophagy); plus
+#   HSP90-inhibitor class members. 
+# =====================================================================
+tanespimycin
+ganetespib
+pimitespib
+hydroxychloroquine
+chloroquine
+metformin
+AICAR

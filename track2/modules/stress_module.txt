@@ -1,0 +1,46 @@
+#These are the druggable downstream consequences of aneuploidy/CIN that a drug should engage: 
+#proteostasis, autophagy, energy/metabolic stress, serine/sphingolipid, and replication stress. 
+#Hitting these exploits the stress state of aneuploid cells 
+
+# Sources: Donnelly 2014 (HSF1/HSP90); Tang & Amon 2011 (autophagy/AMPK);
+#          Hwang 2017 (serine/sphingolipid); Burrell 2013 (replication stress).
+# =====================================================================
+
+#Proteostasis: chaperones + heat-shock response 
+HSP90AA1
+HSP90AB1
+HSPA8
+HSPA1A
+HSF1
+STIP1
+# Proteostasis: ubiquitin-proteasome system
+PSMB5
+PSMB1
+PSMB2
+PSMA3
+PSMD1
+VCP
+
+#Autophagy
+MAP1LC3B
+ATG5
+ATG7
+SQSTM1
+BECN1
+
+#Energy / metabolic stress (AMPK axis)
+PRKAA1
+PRKAA2
+PRKAB1
+STK11
+
+#Serine / sphingolipid metabolic liability 
+SPTLC1
+SPTLC2
+PHGDH
+PSAT1
+
+#Replication-stress response
+ATR
+CHEK1
+WEE1

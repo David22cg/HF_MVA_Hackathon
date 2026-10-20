@@ -1,0 +1,10 @@
+# Genes that aneuploid / whole-genome-doubled cells selectively depend on
+# (synthetic-lethal), so inhibiting them kills aneuploid cells without
+# further breaking mitotic fidelity.
+# Source: Cohen-Sharir et al. 2021 Nature; Quinton 2021; Marquis 2021;
+#         DepMap/PRISM (depmap.org). Add more after a DepMap correlation run.
+
+KIF18A
+# (candidate additional aneuploidy/WGD dependencies )
+UBE2C
+KIF11

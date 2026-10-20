@@ -1,0 +1,22 @@
+drug	targets	status	pediatric	note
+bortezomib	PSMB5;PSMB1	approved	limited	proteasome inhibitor (myeloma); proteostasis overload
+carfilzomib	PSMB5	approved	limited	proteasome inhibitor
+ixazomib	PSMB5	approved	no	oral proteasome inhibitor
+pimitespib	HSP90AA1;HSP90AB1	approved_jp	no	HSP90 inhibitor (approved Japan/GIST only, not FDA/EMA)
+ganetespib	HSP90AA1;HSP90AB1	investigational	no	HSP90 inhibitor (investigational)
+tanespimycin	HSP90AA1	investigational	no	17-AAG; aneuploidy-selective hit (Tang 2011)
+metformin	PRKAA1;PRKAB1;STK11	approved	yes	indirect AMPK activator; energy stress; good pediatric safety
+hydroxychloroquine	MAP1LC3B;SQSTM1	approved	yes	autophagy inhibitor; aneuploidy-selective hit (chloroquine, Tang 2011)
+berzosertib	ATR	investigational	no	ATR inhibitor; replication-stress synthetic lethality
+adavosertib	WEE1	investigational	no	WEE1 inhibitor; replication-stress
+AMG650	KIF18A	investigational	no	KIF18A inhibitor; aneuploidy/WGD synthetic-lethal dependency
+empesertib	TTK	investigational	no	MPS1/TTK (SAC) inhibitor -> forces missegregation (DANGER)
+CFI-402257	TTK	investigational	no	MPS1/TTK (SAC) inhibitor (DANGER)
+alisertib	AURKA	investigational	no	Aurora A inhibitor -> mitotic infidelity (DANGER)
+barasertib	AURKB	investigational	no	Aurora B inhibitor (DANGER)
+volasertib	PLK1	investigational	no	PLK1 inhibitor -> mitotic infidelity (DANGER)
+palbociclib	CDK4;CDK6	approved	limited	CDK4/6 inhibitor -> slows G1/S (KINETIC RESCUE, Hyp.1)
+ribociclib	CDK4;CDK6	approved	limited	CDK4/6 inhibitor -> slows G1/S (KINETIC RESCUE, Hyp.1)
+abemaciclib	CDK4;CDK6	approved	no	CDK4/6 inhibitor -> slows G1/S (KINETIC RESCUE, Hyp.1)
+sirolimus	MTOR	approved	yes	rapamycin; mTOR inhibitor -> slows proliferation + relieves proteotoxic load; good pediatric safety
+everolimus	MTOR;RPTOR	approved	yes	mTOR inhibitor; approved in children (TSC/SEGA) -> kinetic rescue + proteostasis

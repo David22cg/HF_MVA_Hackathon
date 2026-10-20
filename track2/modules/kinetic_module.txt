@@ -1,0 +1,30 @@
+#sub-lethal drugs that lengthen the cell cycle give the kinetochores more time to align
+# chromosomes mechanically and slow the expain of aneuploid clones.
+#
+# This module holds the cell-cycle-slowing targets whose (partial, low-dose)
+# inhibition lengthens the cycle without inhibiting the spindle-assembly
+# checkpoint itself:
+#   - G1/S restriction point: CDK4/6 + D-type cyclins + RB axis  (palbociclib,
+#     ribociclib, abemaciclib) -> fewer error-prone divisions per unit time
+#   - mTOR growth signalling: MTOR/RPTOR (rapamycin, everolimus) -> slows
+#     proliferation and relieves proteotoxic load
+# A drug hitting these is not vetoed because none of them is a SAC component
+# Sources: Weaver & Cleveland 2007 (mitotic timing & aneuploidy);
+#          Santaguida & Amon 2015 (consequences of aneuploidy);
+#          CDK4/6i & mTORi pediatric-oncology repurposing literature.
+# =====================================================================
+
+#G1/S restriction point 
+CDK4
+CDK6
+CDK2
+CCND1
+CCND2
+CCND3
+CCNE1
+RB1
+
+#growth / proteostatic load (mTOR axis)
+MTOR
+RPTOR
+RICTOR

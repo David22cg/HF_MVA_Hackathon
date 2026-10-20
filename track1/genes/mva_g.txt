@@ -1,0 +1,24 @@
+#core 
+# BUB1B  = 1 missense + 1 truncante = compound-het.
+#          Ref: Hanks et al. 2004, Nat Genet, doi:10.1038/ng1449-> MVA type 1. 
+BUB1B	core
+# CEP57  = -> MVA type 2. 
+#          Ref: Snape et al. 2011, Nat Genet, doi:10.1038/ng.822
+CEP57	core
+# TRIP13 = -> MVA type 3.
+#          Ref: Yost et al. 2017, Nat Genet, doi:10.1038/ng.3883
+TRIP13	core
+
+# ext -> SAC
+# MAD2L1BP = p31-comet Ref: JCI 2023, PMCID PMC10721328
+MAD2L1BP	ext
+BUB1	ext          
+BUB3	ext          
+MAD1L1	ext          
+MAD2L1	ext          
+TTK	ext          
+CENPE	ext         
+CEP57L1	ext
+ZW10	ext          
+ZWILCH	ext          
+NDC80	ext          

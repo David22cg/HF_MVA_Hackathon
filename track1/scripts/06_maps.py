@@ -1,15 +1,9 @@
-#!/usr/bin/env python3
-# =====================================================================
-# 06_maps.py 
 #   (1) interaction network-> string. The subgraph is induced on the
 #       candidate genes + their highest-confidence neighbors, so it
 #       reflects actual interactions and scales to any candidate set
 #   (2) chromosome ideogram with the position of each candidate variant marked
 #
-# INPUT : STRING (optional, local): paths.string_links + paths.string_info
-#         download once (human, taxon 9606) from https://string-db.org/
-#
-# USAGE:  python3 06_maps.py            # uses ./config.yaml
+# INPUT : STRING (optional, local): paths.string_links + paths.string_info download once (human, taxon 9606) from https://string-db.org/
 #   (requires: pip install networkx matplotlib)
 # =====================================================================
 import sys, os, csv, gzip, yaml

@@ -1,33 +1,38 @@
 *.vcf
-*.png
-*.csv
 *.vcf.gz
 *.vcf.gz.tbi
-*.fastq
-*.fastq.gz
-*.fast1.gz
 *.bam
 *.bai
 *.cram
-hpo_terms.txt          
+*.fastq
+*.fastq.gz
+hpo_terms.txt           
+work/                    
+out/                     
+track2/out/
+.stripped_chr
+chr2nochr.txt
+norm.log
 
 *.fa
 *.fa.gz
 *.fai
+cache/
+ref/
 clinvar.vcf.gz*
 AlphaMissense_*.tsv.gz*
 spliceai_*.vcf.gz*
-cache/
-ref/
-data/
+*9606.protein.*.txt.gz    
 
 
-work/
-out/                   # incluye el CSV de entrega = variante del paciente
-*.tsv
-chr2nochr.txt
-.stripped_chr
+interactions.tsv
+*.gmt
+track2/data/drug_targets_real.tsv
+track2/data/drug_signatures_real.tsv
+track2/data/seed_genes.txt
+
 __pycache__/
 *.pyc
 .env
 .ipynb_checkpoints/
+

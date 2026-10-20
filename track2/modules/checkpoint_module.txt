@@ -1,0 +1,28 @@
+# Spindle assembly checkpoint (SAC) / kinetochore / mitotic kinases.
+
+# core MVA genes / SAC-MCC 
+BUB1B
+BUB1
+BUB3
+MAD1L1
+MAD2L1
+MAD2L1BP
+TRIP13
+CEP57
+CDC20
+FZR1
+
+# kinetochore / microtubule attachment 
+CENPE
+NDC80
+ZW10
+ZWILCH
+SPC25
+KNL1
+CASC5
+
+# mitotic kinases whose inhibition forces missegregation 
+TTK
+AURKA
+AURKB
+PLK1

@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
-# INPUT : work/annotated.vcf.gz  (from 02 = VCF with VEP annotation in
-#         INFO/CSQ + the sample's GT/AD/DP genotype)
-# OUTPUT: work/candidates.tsv    (ranked table read by 05_make_csv.py)
-#   1. Reads each variant: gene, consequence, gnomAD, ClinVar, AlphaMissense,
-#      SpliceAI , and from the genotype derives zygosity (het/hom) and VAF.
-#   2. Separates PRIMARY (MVA panel genes) from SECONDARY (actionable ACMG SF
-#      genes, only if ClinVar-pathogenic or LoF) and drops the rest.
+#   1. Reads each variant: gene, consequence, gnomAD, ClinVar, AlphaMissense, SpliceAI , and from the genotype derives zygosity (het/hom) and VAF.
+#   2. Separates primary  from secondary findings
 #   3. Splits into tracks (recessive / dominant / mosaic) and pairs compound-het within the same gene.
-#   4. Scores with a additive rubric: panel gene + phenotype match (HPO) + recessive completeness + molecular damage + rarity + mosaic. 
-#
-# USAGE:  python3 03_filter_rank.py            # uses ./config.yaml
+#   4. Scores with a additive rubric: panel gene + phenotype match (HPO) + recessive completeness + molecular damage + rarity + mosaic
+
 import sys, gzip, os, yaml
 from collections import defaultdict
 
@@ -63,7 +57,7 @@ for g in load_gene_list(cfg["paths"].get("phenocopy")):
     panel.setdefault(g, "phenocopy")
 acmg_sf = set(load_gene_list(cfg["paths"].get("acmg_sf")))
 
-# phenotype 
+# phenotype
 hpo_patient = set()
 hpo_path = os.path.expanduser(cfg["paths"].get("hpo_terms", ""))
 if hpo_path and os.path.exists(hpo_path):
@@ -72,7 +66,7 @@ if hpo_path and os.path.exists(hpo_path):
         if t.startswith("HP:"):
             hpo_patient.add(t)
 
-# load annotated VCF and filter variants 
+# load annotated VCF and filter variants
 gene_hpo = defaultdict(set)
 hg_path = os.path.expanduser(cfg["paths"].get("hpo_genes", ""))
 if hg_path and os.path.exists(hg_path):
@@ -137,6 +131,7 @@ with gzip.open(ANN, "rt") as fh:
         clnsig = ann.get("ClinVar_CLNSIG", "") or ""
         consequence = ann.get("Consequence", "")
         impact = ann.get("IMPACT", "")
+        lof_flag = ann.get("LoF", "")        # LOFTEE confidence on LoF variants: HC / LC / '' (plugin off)
 
         # SpliceAI: max of the DS_* delta scores
         ds = []
@@ -169,7 +164,7 @@ with gzip.open(ANN, "rt") as fh:
         in_panel = tier_sym is not None
         is_mva   = tier_sym in ("core", "ext")
         in_acmg  = symbol in acmg_sf
-        pheno_rel = phenotype_points(symbol) > 0  
+        pheno_rel = phenotype_points(symbol) > 0
         is_core   = tier_sym == "core"
         resc_prio = rescue_priority(consequence, af) if is_core else 0
         is_rescue = (is_core and resc_prio > 0 and not strict and not moderate and not clinvar_benign)
@@ -203,17 +198,19 @@ with gzip.open(ANN, "rt") as fh:
             in_panel=in_panel, is_het=is_het, is_hom=is_hom, vaf=vaf, dp=dp, af=af,
             am=am, clnsig=clnsig, consequence=consequence, impact=impact, is_lof=is_lof,
             is_splice=is_splice, is_clinvar_path=is_clinvar_path, strict=strict, flt=flt,
-            is_rescue=is_rescue, resc_prio=resc_prio,
+            is_rescue=is_rescue, resc_prio=resc_prio, is_lof_lc=(lof_flag == "LC"),
         ))
 
-#group by gene 
+#group by gene
 by_gene = defaultdict(list)
 for v in variants:
     by_gene[v["symbol"]].append(v)
 
 def deleterious_points(v):
     if v["is_clinvar_path"]: return 5
-    if v["is_lof"] or v["is_splice"]: return 3
+    if v["is_splice"]: return 3
+    if v["is_lof"]:
+        return 2 if v.get("is_lof_lc") else 3   # LOFTEE: low-confidence LoF (LC) scores less than HC
     if v["am"] is not None:
         if v["am"] >= AM_MIN: return 2          # pathogenic missense (AlphaMissense)
         if v["am"] >= 0.34:   return 1          # VUS missense (possible 2nd copy)
@@ -245,8 +242,6 @@ for sym, vs in by_gene.items():
     het2 = hetm + resc                                                     # any possible 2nd copy
     hom1 = [v for v in vs if v["is_hom"] and v["strict"]]
 
-    # only in curated genes (MVA/phenocopy). Genome-wide, with no trio and no phasing
-    # a compound-het is speculative and must not inflate the ranking
     allow_compound = panel.get(sym) in ("core", "ext", "phenocopy")
     pair = None
     if allow_compound and len(het1) >= 2:
@@ -275,7 +270,7 @@ for sym, vs in by_gene.items():
         score = gene_points(sym) + BIALLELIC_BONUS + deleterious_points(v) + rarity_points(v)
         rows.append(dict(kind="homozygous", score=score, v1=v, v2=None, symbol=sym, review=""))
 
-    #lone strong allele 
+    #lone strong allele
     for v in het1:
         score = gene_points(sym) + SINGLE_HET_BONUS + deleterious_points(v) + rarity_points(v)
         rows.append(dict(kind="single_het", score=score, v1=v, v2=None, symbol=sym, review=""))
