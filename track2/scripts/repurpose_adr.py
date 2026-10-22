@@ -129,6 +129,32 @@ def benjamini_hochberg(pvals):
     return q
 
 
+def module_lcc(G, module, bin_of, binmembers, nrand):
+    # disease-module test (Menche 2015): is the largest connected component of the
+    # module bigger than for degree-matched random gene sets of the same size?
+    import networkx as nx
+    seeds = [g for g in module if g in G]
+    if len(seeds) < 2:
+        return None
+    size = lambda nodes: max((len(c) for c in nx.connected_components(G.subgraph(nodes))), default=0)
+    def rand_set():
+        out = set()
+        for g in seeds:
+            for _ in range(10):
+                c = random.choice(binmembers[bin_of[g]])
+                if c not in out:
+                    out.add(c); break
+            else:
+                out.add(c)
+        return out
+    obs = size(seeds)
+    null = np.array([size(rand_set()) for _ in range(nrand)])
+    sd = null.std()
+    z = (obs - null.mean()) / sd if sd > 0 else 0.0
+    p = (int(np.sum(null >= obs)) + 1) / (nrand + 1)
+    return dict(n=len(seeds), lcc=obs, rand=round(float(null.mean()), 1), z=round(float(z), 2), p=round(float(p), 4))
+
+
 G = load_string_graph()
 BIG = G.number_of_nodes()                      # distance for targets not reachable
 stress = load_set(P["stress_module"]); checkpoint = load_set(P["checkpoint_module"])
@@ -163,8 +189,18 @@ if CHK.get("from_seed") and seed_genes:
 dist_stress, seed_s = dist_to_module(G, stress)
 dist_check,  seed_c = dist_to_module(G, checkpoint)
 bin_of, binmembers = degree_bins(G)
+HUB_CUT = float(np.percentile([d for _, d in G.degree()], 99))   # top 1% degree = hub
 print(f"[adr] STRING graph: {G.number_of_nodes()} genes, {G.number_of_edges()} edges; "
       f"stress seeds={len(seed_s)}, checkpoint seeds={len(seed_c)}")
+
+# disease-module connectivity check (writes module_validation.txt)
+with open(os.path.join(OUT, "module_validation.txt"), "w") as mf:
+    mf.write("disease-module connectivity: largest connected component vs degree-matched random\n")
+    for name, mod in (("stress", stress), ("checkpoint", checkpoint)):
+        v = module_lcc(G, mod, bin_of, binmembers, min(NRAND, 500))
+        if v:
+            ln = f"{name:<11} genes={v['n']} LCC={v['lcc']} random={v['rand']} z={v['z']} p={v['p']}"
+            mf.write(ln + "\n"); print("[adr] module", ln)
 
 rows = []
 for r in csv.DictReader(open(os.path.expanduser(P["drug_targets"])), delimiter="\t"):
@@ -174,10 +210,11 @@ for r in csv.DictReader(open(os.path.expanduser(P["drug_targets"])), delimiter="
     on_checkpoint = [t for t in tg if t in checkpoint]
     on_deps       = [t for t in tg if t in deps]
     on_kinetic    = [t for t in tg if t in kinetic]
+    on_hub        = [t for t in in_G if G.degree(t) >= HUB_CUT]   # high-degree, likely toxic to inhibit
     if not in_G:
         rows.append(dict(drug=drug, status=status, pediatric=ped, targets=";".join(tg),
                          z_stress=float("nan"), z_check=float("nan"), closeness_stress=float("nan"),
-                         dependency=bool(on_deps), kinetic=bool(on_kinetic),
+                         dependency=bool(on_deps), kinetic=bool(on_kinetic), hub=bool(on_hub),
                          approved=status.startswith("approved"),
                          veto=bool(on_checkpoint), score=float("-inf"),
                          p_stress=float("nan"), q_stress=float("nan"),
@@ -228,11 +265,14 @@ for r in csv.DictReader(open(os.path.expanduser(P["drug_targets"])), delimiter="
     else:
         rec = "LOW"
         reason = f"not stress-proximal (z={z_stress:.2f})"
+    if on_hub:                                 # centrality is not therapeutic importance
+        reason += f"  [hub target ({','.join(on_hub)}), may be toxic to inhibit]"
     rows.append(dict(drug=drug, status=status, pediatric=ped, targets=";".join(tg),
                      z_stress=round(z_stress, 2), z_check=round(z_check, 2),
                      closeness_stress=round(closeness_stress, 2),
                      p_stress=round(p_stress, 4), q_stress=float("nan"),
-                     dependency=dependency, kinetic=kinetic_rescue, approved=approved, veto=veto,
+                     dependency=dependency, kinetic=kinetic_rescue, hub=bool(on_hub),
+                     approved=approved, veto=veto,
                      score=round(score, 2), recommendation=rec, reason=reason))
 
 # multiple-testing correction over scorable, non-vetoed drugs (vetoed are safety calls)
@@ -264,7 +304,7 @@ if known_pos:
 rows.sort(key=lambda r: (not r["veto"], r["score"]), reverse=True)
 
 cols = ["rank", "drug", "recommendation", "score", "z_stress", "p_stress", "q_stress",
-        "z_check", "dependency", "kinetic", "veto", "approved", "pediatric", "status",
+        "z_check", "dependency", "kinetic", "hub", "veto", "approved", "pediatric", "status",
         "targets", "reason"]
 dest = os.path.join(OUT, "adr_ranking.tsv")
 with open(dest, "w") as fh:

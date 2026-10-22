@@ -105,7 +105,7 @@ def main():
             network_rec=nrec or "-", network_score=net.get(d, {}).get("score", "-"),
             network_fdr=net.get(d, {}).get("q_stress", "-"),   # FDR of stress proximity
             reversal=sig.get(d, {}).get("reversal", "-"), signature_call=scall or "-",
-            veto=veto,
+            veto=veto, hub=net.get(d, {}).get("hub", "-"),
             targets=net.get(d, {}).get("targets", sig.get(d, {}).get("targets", "-")),
             reason=net.get(d, {}).get("reason", "") or sig.get(d, {}).get("reason", ""),
         ))
@@ -116,7 +116,7 @@ def main():
 
     cols = ["rank", "drug", "final_call", "support", "combined",
             "network_rec", "network_score", "network_fdr", "reversal", "signature_call",
-            "veto", "targets", "reason"]
+            "hub", "veto", "targets", "reason"]
     dest = os.path.join(OUT, "repurpose_ranking.tsv")
     with open(dest, "w") as fh:
         fh.write("\t".join(cols) + "\n")
