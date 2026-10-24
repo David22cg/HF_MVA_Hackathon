@@ -1,6 +1,6 @@
-proband_id: "WGS_EX2312012_HGWCNDSX7"  
-hf_username: "genomEx"  # hugging face
-approach_name: "MVA_track1"   # csv
+proband_id: ""  #id 
+hf_username: "genomEx"  # user-group-name
+approach_name: ""   # csv name
 add_chr_prefix: true       #  chr
 subtype_hint: "none"       
                         

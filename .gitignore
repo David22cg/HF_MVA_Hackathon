@@ -23,6 +23,7 @@ clinvar.vcf.gz*
 AlphaMissense_*.tsv.gz*
 spliceai_*.vcf.gz*
 *9606.protein.*.txt.gz    
+rank_var.tsv
 
 
 interactions.tsv

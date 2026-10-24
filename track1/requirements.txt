@@ -1,1 +1,4 @@
+matplotlib
+networkx
+numpy
 PyYAML>=6.0,<7
