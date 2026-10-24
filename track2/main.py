@@ -4,7 +4,7 @@
 # Each .py score is z-normalised, then combined = w_network*z(net) + w_signature*z(rev).
 # A drug vetoed always sinks to the bottom; 
 
-import os, sys, csv, subprocess, argparse, yaml
+import os, sys, csv, subprocess, argparse, yaml, math
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 
@@ -71,52 +71,69 @@ def main():
     net_scores = [fnum(net.get(d, {}), "score") for d in drugs]
     rev_scores = [fnum(sig.get(d, {}), "reversal") for d in drugs]
     vetoed = [str(net.get(d, {}).get("veto", "")).lower() == "true" for d in drugs]
-    # drop vetoed scores from the network z-norm so their -100 doesn't skew it
-    net_for_z = [float("nan") if vetoed[i] else net_scores[i] for i in range(len(drugs))]
+    # drop vetoed AND non-finite (unscorable -inf) scores from the network z-norm
+    net_for_z = [float("nan") if (vetoed[i] or not math.isfinite(net_scores[i])) else net_scores[i]
+                 for i in range(len(drugs))]
     zn = zscores(net_for_z); zs = zscores(rev_scores)
 
+    GENOTOXIC = {"TOP2A", "TOP2B", "TOP1", "TOP1MT"}   # DNA-damaging targets, avoid in a CIN patient
     rows = []
     for i, d in enumerate(drugs):
         nrec = net.get(d, {}).get("recommendation", "")
         scall = sig.get(d, {}).get("call", "")
-        net_support = nrec.startswith("PRIORITIZE")
-        sig_support = scall.startswith("REVERSES")
-        sig_mimic   = scall.startswith("MIMICS")
         veto = vetoed[i]
+        try:
+            pf = float(net.get(d, {}).get("p_stress", "nan"))
+        except (ValueError, TypeError):
+            pf = float("nan")
+        # nominal proximity significance (p<0.05). FDR q is reported separately, but a
+        # genome-wide q is too strict at ~16000 tests, so it does not gate the label.
+        prox_sig = (pf == pf and pf <= 0.05)
+        sig_rev = scall.startswith("REVERSES")
+        sig_mim = scall.startswith("MIMICS")
+        is_dep  = "dependency" in nrec
+        is_kin  = "kinetic rescue" in nrec
+        tgt = (net.get(d, {}).get("targets") or sig.get(d, {}).get("targets") or "")
+        genotoxic = any(g.strip() in GENOTOXIC for g in tgt.upper().replace(";", ",").split(","))
 
         combined = WN * zn[i] + WS * zs[i]
-        if veto:                                            # safety overrides everything
-            support, final = "VETOED (SAC-acting)", "SAFETY-VETO"
-            combined -= 100
-        elif net_support and sig_support:                   # strongest
-            support, final = "TRIANGULATED (both arms)", "PRIORITIZE"
-        elif net_support and sig_mimic:                     #  temper
-            support, final = "NETWORK-only (signature MIMICS - temper)", "CONSIDER (conflict)"
-        elif net_support:
-            support, final = "NETWORK-only", "CONSIDER"
-        elif sig_support:
-            support, final = "SIGNATURE-only", "CONSIDER"
+        # mechanism-priority tier: precise, defensible routes rank above statistical-only hits
+        if veto:
+            support, final, tier = "VETOED (SAC-acting)", "SAFETY-VETO", -1; combined -= 100
+        elif is_dep:
+            support, final, tier = "DEPENDENCY (aneuploidy)", "PRIORITIZE", 5
+        elif is_kin:
+            support, final, tier = "KINETIC RESCUE", "PRIORITIZE", 4
+        elif prox_sig and sig_rev:
+            support, final, tier = "TRIANGULATED (proximal + reverses)", "PRIORITIZE", 3
+        elif prox_sig:
+            support, final, tier = "NETWORK (proximal p<0.05)", "CONSIDER", 2
+        elif sig_rev:
+            support, final, tier = "SIGNATURE-only", "CONSIDER", 1
+        elif nrec.startswith("PRIORITIZE") and sig_mim:
+            support, final, tier = "NETWORK-only (signature MIMICS)", "CONSIDER (conflict)", 0
         else:
-            support, final = "weak/none", "LOW"
+            support, final, tier = "weak/none", "LOW", 0
+        if genotoxic and not veto:                         # mutagen, deprioritize in a cancer-prone CIN patient
+            support += " [genotoxic]"; final = "CONSIDER (genotoxic, caution)"; tier = min(tier, 0)
 
         disp = net.get(d, {}).get("drug") or sig.get(d, {}).get("drug") or d
         rows.append(dict(
-            drug=disp, final_call=final, support=support, combined=round(combined, 3),
+            drug=disp, final_call=final, support=support, combined=round(combined, 3), tier=tier,
             network_rec=nrec or "-", network_score=net.get(d, {}).get("score", "-"),
             network_fdr=net.get(d, {}).get("q_stress", "-"),   # FDR of stress proximity
             reversal=sig.get(d, {}).get("reversal", "-"), signature_call=scall or "-",
-            veto=veto, hub=net.get(d, {}).get("hub", "-"),
+            veto=veto, hub=net.get(d, {}).get("hub", "-"), genotoxic=genotoxic,
             targets=net.get(d, {}).get("targets", sig.get(d, {}).get("targets", "-")),
             reason=net.get(d, {}).get("reason", "") or sig.get(d, {}).get("reason", ""),
         ))
 
-    # non-vetoed first, triangulated above the rest, then by combined score
-    rows.sort(key=lambda r: (not r["veto"], r["support"].startswith("TRIANGULATED"), r["combined"]),
-              reverse=True)
+    # rank: non-vetoed first, non-genotoxic first, then mechanism tier, then combined score
+    rows.sort(key=lambda r: (not r["veto"], not r["genotoxic"], r["tier"], r["combined"]), reverse=True)
 
     cols = ["rank", "drug", "final_call", "support", "combined",
             "network_rec", "network_score", "network_fdr", "reversal", "signature_call",
-            "hub", "veto", "targets", "reason"]
+            "hub", "genotoxic", "veto", "targets", "reason"]
     dest = os.path.join(OUT, "repurpose_ranking.tsv")
     with open(dest, "w") as fh:
         fh.write("\t".join(cols) + "\n")

@@ -32,7 +32,7 @@ significant_z: -1.64      # z <= this = "significantly proximal" (one-sided p<0.
 allow_demo: false         #just a demo
 
 checkpoint:
-  from_seed: true         # derive the veto set dynamically from seed + STRING 
+  from_seed: false         # derive the veto set dynamically from seed + STRING 
   radius: 1               # hops from the seed on the score>=string_min_score STRING graph
   replace_static: true   #demo-> false
 

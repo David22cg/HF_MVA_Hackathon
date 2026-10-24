@@ -1,6 +1,4 @@
-# Spindle assembly checkpoint (SAC) / kinetochore / mitotic kinases.
-
-# core MVA genes / SAC-MCC 
+#core MVA genes / SAC-MCC
 BUB1B
 BUB1
 BUB3
@@ -12,7 +10,7 @@ CEP57
 CDC20
 FZR1
 
-# kinetochore / microtubule attachment 
+#kinetochore / microtubule attachment
 CENPE
 NDC80
 ZW10
@@ -21,8 +19,30 @@ SPC25
 KNL1
 CASC5
 
-# mitotic kinases whose inhibition forces missegregation 
+#mitotic kinases whose inhibition forces missegregation
 TTK
 AURKA
 AURKB
 PLK1
+
+# spindle microtubules: targets of antimitotic poisons (vinca alkaloids,taxanes, benzimidazoles, colchicine)
+# Binding them disrupts the spindle and forces missegregation, so these drugs are vetoed in MVA.
+TUBB
+TUBB1
+TUBB2A
+TUBB2B
+TUBB3
+TUBB4A
+TUBB4B
+TUBB6
+TUBB8
+TUBA1A
+TUBA1B
+TUBA1C
+TUBA3C
+TUBA3E
+TUBA4A
+TUBG1
+TUBG2
+# mitotic kinesin Eg5 (spindle poison target); note KIF18A stays a dependency
+KIF11
