@@ -1,6 +1,6 @@
 # Drug repurposing for Mosaic Variegated Aneuploidy
 
-This directory contains an offline, scalable drug-repurposing model for Mosaic Variegated Aneuploidy. The model ranks approved and investigational drugs using two independent mechanism-based methods and a safety constraint derived from the disease biology. 
+This directory contains an offline scalable drug-repurposing model for Mosaic Variegated Aneuploidy. The model ranks approved and investigational drugs using two independent mechanism-based methods and a safety constraint derived from the disease biology. 
 All outputs arehypotheses for experimental follow-up.
 
 ## Method
@@ -8,8 +8,7 @@ All outputs arehypotheses for experimental follow-up.
 The causal variant weakens the spindle assembly checkpoint, which allows cells to
 enter anaphase before the chromosomes are correctly attached and produces mosaic
 aneuploidy. Because the defect is a loss of function in a structural checkpoint
-protein, the model does not attempt to restore the protein. It targets the
-downstream consequences of aneuploidy.
+protein, the model targets the downstream consequences of aneuploidy.
 
 The first method measures network proximity on the STRING protein interaction
 network reused from Track 1. For each drug it computes the distance from the drug
@@ -36,8 +35,7 @@ correction is applied with the Benjamini-Hochberg procedure. The model also
 reports how many literature compounds with established aneuploidy selectivity it
 recovers, as an external validation.
 
-The model is unsupervised and mechanism-based. Mosaic Variegated Aneuploidy affects fewer than fifty patients worldwide and has no labelled drug-outcome data, so a trained classifier would overfit. Network proximity and signature reversal require no training labels and every score is
-explainable.
+The model is unsupervised and mechanism-based. Mosaic Variegated Aneuploidy affects fewer than fifty patients worldwide and has no labelled drug-outcome data, so a trained classifier would overfit. Network proximity and signature reversal require no training labels and every score is explainable.
 
 To apply the model to another disease, replace the module gene lists and the
 disease signature. 
@@ -89,8 +87,6 @@ Install the dependencies in the same environment as Track 1.
 pip install networkx numpy matplotlib pyyaml
 cd ../track2
 ```
-
-Build the real inputs and run.
 
 ```bash
 python3 scripts/from_track1.py                 # writes data/seed_genes.txt from Track 1
