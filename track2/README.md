@@ -1,4 +1,4 @@
-# Track 2. Drug repurposing for Mosaic Variegated Aneuploidy
+# Drug repurposing for Mosaic Variegated Aneuploidy
 
 This directory contains an offline, scalable drug-repurposing model for Mosaic Variegated Aneuploidy. The model ranks approved and investigational drugs using two independent mechanism-based methods and a safety constraint derived from the disease biology. 
 All outputs arehypotheses for experimental follow-up.
